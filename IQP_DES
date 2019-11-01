@@ -1,0 +1,22 @@
+--------------------------------------------------------
+--  File created - Tuesday-May-28-2019   
+--------------------------------------------------------
+--------------------------------------------------------
+--  DDL for View IQP_DES
+--------------------------------------------------------
+
+  CREATE OR REPLACE  VIEW "IQP_DES" ("INDICADOR", "NOTA", "DESCRICAO") AS 
+  
+SELECT 'DES' Indicador, ROUND((1-A/B)*100,2) Nota, 'CTMT Desconectado' Descrição
+FROM
+(SELECT COUNT (DISTINCT CTMT) B FROM ELEMENTOREDECOMPAC WHERE TABELA IN ('PIP_PVW','UCBT_PVW','UCMT_PVW')),
+(SELECT COUNT(*) A FROM (
+SELECT
+    CTMT,
+    SUM(CASE WHEN ORDEM IS NOT NULL THEN 1 ELSE 0 END) CONECTADOS,
+    SUM(CASE WHEN ORDEM IS NULL THEN 1 ELSE 0 END) DESCONECTADOS,
+    ROUND(SUM(CASE WHEN ORDEM IS NULL THEN 1 ELSE 0 END)/COUNT( * ) * 100,3) AS PERCENT_DESCON
+FROM ELEMENTOREDECOMPAC
+GROUP BY CTMT
+) WHERE PERCENT_DESCON>2)
+;
